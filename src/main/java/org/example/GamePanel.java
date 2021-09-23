@@ -21,6 +21,9 @@ public class GamePanel extends JPanel implements ActionListener {
     int applesEaten;
     int appleX;
     int appleY;
+    boolean poison = false;
+    int poisonX;
+    int poisonY;
     char direction = 'R';
     boolean running = false;
     Timer timer;
@@ -34,6 +37,7 @@ public class GamePanel extends JPanel implements ActionListener {
         setFocusable(true);
         this.addKeyListener(new MyKeyAdaptor());
         startGame();
+        int highScore;
     }
 
     public void startGame(){
@@ -41,6 +45,7 @@ public class GamePanel extends JPanel implements ActionListener {
         running = true;
         timer = new Timer(DELAY, this);
         timer.start();
+
     }
 
     public void paintComponent(Graphics g) {
@@ -58,6 +63,11 @@ public class GamePanel extends JPanel implements ActionListener {
 
             g.setColor(Color.red);
             g.fillOval(appleX, appleY, UNIT_SIZE, UNIT_SIZE);
+
+            if (poison) {
+                g.setColor(Color.GREEN);
+                g.fillOval(poisonX, poisonY, UNIT_SIZE, UNIT_SIZE);
+            }
 
             for (int i = 0; i < bodyParts; i++) {
                 if (i == 0) {
@@ -83,6 +93,13 @@ public class GamePanel extends JPanel implements ActionListener {
     public void newApple() {
         appleX = random.nextInt((int)(SCREEN_WIDTH / UNIT_SIZE)) * UNIT_SIZE;
         appleY = random.nextInt((int)(SCREEN_HEIGHT / UNIT_SIZE)) * UNIT_SIZE;
+
+        if (bodyParts % 5 == 0) {
+            poison = true;
+            poisonX = random.nextInt((int)(SCREEN_WIDTH / UNIT_SIZE)) * UNIT_SIZE;
+            poisonY = random.nextInt((int)(SCREEN_HEIGHT / UNIT_SIZE)) * UNIT_SIZE;
+        } else poison = false;
+
 
     }
 
@@ -116,6 +133,11 @@ public class GamePanel extends JPanel implements ActionListener {
             newApple();
         }
 
+        if (x[0] == poisonX && y[0] == poisonY) {
+            applesEaten = applesEaten - 3;
+            newApple();
+        }
+
     }
 
     public void checkCollisions() {
@@ -144,6 +166,7 @@ public class GamePanel extends JPanel implements ActionListener {
 
         if(!running) {
             timer.stop();
+
         }
 
     }
@@ -158,7 +181,9 @@ public class GamePanel extends JPanel implements ActionListener {
         g.setColor(Color.red);
         g.setFont(new Font("Bank Gothic", Font.BOLD, 30));
         FontMetrics metrics2 = getFontMetrics(g.getFont());
-        g.drawString("Score: "+applesEaten, (SCREEN_WIDTH - metrics2.stringWidth("Score: "+applesEaten))/2, g.getFont().getSize());
+        g.drawString("Your Score: "+applesEaten, (SCREEN_WIDTH - metrics2.stringWidth("Your Score: "+applesEaten))/2, g.getFont().getSize());
+//        g.drawString("HighScore: "+highScore, (SCREEN_WIDTH - metrics2.stringWidth("HighScore: "+highScore))/2, g.getFont().getSize()*2);
+        g.drawString("Press SPACE to retry", metrics2.stringWidth("Press SPACE to retry")/2, (SCREEN_HEIGHT - g.getFont().getSize()));
     }
 
     @Override
@@ -195,6 +220,12 @@ public class GamePanel extends JPanel implements ActionListener {
                 case KeyEvent.VK_DOWN:
                     if (direction != 'U') {
                         direction = 'D';
+                    }
+                    break;
+                case KeyEvent.VK_SPACE:
+                    if (!running) {
+                        new GameFrame();
+
                     }
                     break;
 
